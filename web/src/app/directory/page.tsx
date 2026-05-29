@@ -38,7 +38,7 @@ export default function DirectoryPage() {
         !cityFilter || m.location?.toLowerCase().includes(cityFilter.toLowerCase())
 
       const matchesOpenTo =
-        !openToFilter || m.openTo?.includes(openToFilter as Member['openTo'][0])
+        !openToFilter || m.openTo?.includes(openToFilter as 'jobs' | 'mentoring' | 'hiring' | 'collaboration')
 
       return matchesSearch && matchesCity && matchesOpenTo
     })
