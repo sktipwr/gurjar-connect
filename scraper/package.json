@@ -1,0 +1,14 @@
+{
+  "name": "gurjar-linkedin-scraper",
+  "version": "1.0.0",
+  "description": "Scrape Gurjar community LinkedIn group members",
+  "main": "scrape.js",
+  "scripts": {
+    "scrape": "node scrape.js",
+    "install-browser": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0",
+    "dotenv": "^16.4.5"
+  }
+}

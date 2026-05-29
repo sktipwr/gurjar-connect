@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+
+# Next.js
+web/.next/
+web/out/
+
+# Scraper output — data is bundled into web/public/ before deploy
+data/
+
+# Playwright browsers
+scraper/node_modules/
