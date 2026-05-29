@@ -1,11 +1,10 @@
 // Server component — reads session on every request, no client flash
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/auth'
 import NavbarAuthButton from './NavbarAuthButton'
 
 export default async function Navbar() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  const user = await getCurrentUser()
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">

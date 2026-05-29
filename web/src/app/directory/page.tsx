@@ -1,10 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/auth'
 import Navbar from '@/components/Navbar'
 import DirectoryClient from './DirectoryClient'
 
 export default async function DirectoryPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  const user = await getCurrentUser()
 
   return (
     <main className="min-h-screen bg-gray-50">

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         .from('profiles')
         .select('linkedin_url')
         .eq('id', data.user.id)
-        .single()
+        .maybeSingle()
 
       if (profile?.linkedin_url) {
         // Returning user — go straight to directory

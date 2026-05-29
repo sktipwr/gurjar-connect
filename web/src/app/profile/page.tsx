@@ -1,13 +1,15 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/auth'
 import Navbar from '@/components/Navbar'
 import ProfileClient from './ProfileClient'
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  const user = await getCurrentUser()
 
   if (!user) redirect('/join')
+
+  const supabase = await createClient()
 
   // Load profile data
   const { data: profile } = await supabase

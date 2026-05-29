@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/auth'
 import BottomNav from '@/components/BottomNav'
 import InAppBrowserBanner from '@/components/InAppBrowserBanner'
 
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Fetch session once per request — passed to BottomNav to avoid client-side flash
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  // Fetch session once per request — passed to BottomNav to avoid client-side flash.
+  // cache()-wrapped, so layout + page + Navbar share a single getUser() call.
+  const user = await getCurrentUser()
 
   return (
     <html

@@ -7,8 +7,15 @@
 const { createClient } = require('../web/node_modules/@supabase/supabase-js');
 const path = require('path');
 
-const SUPABASE_URL  = 'https://zkvdnsrtadmpxlcbltss.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprdmRuc3J0YWRtcHhsY2JsdHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTk4MTYsImV4cCI6MjA5NTU5NTgxNn0.E3h9BqZSytau-mBKLhaWzpcgVNQMMBf-spjeOHMfzMY';
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL      || process.env.SUPABASE_URL;
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON) {
+  console.error('✗ Missing Supabase env vars.');
+  console.error('  Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, e.g.:');
+  console.error('  export $(grep -v "^#" web/.env.local | xargs) && node scripts/import-members.js');
+  process.exit(1);
+}
 
 // Use service role if available (bypasses RLS), otherwise anon
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

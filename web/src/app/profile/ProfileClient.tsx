@@ -72,6 +72,7 @@ export default function ProfileClient({
     setSaveError('')
     setSaving(true)
 
+    // Fast client-side feedback; the server validates authoritatively
     const normalized = whatsapp.replace(/\D/g, '').slice(-10)
     if (whatsapp && normalized.length !== 10) {
       setSaveError('Enter a valid 10-digit Indian mobile number')
@@ -80,20 +81,18 @@ export default function ProfileClient({
     }
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.from('profiles').upsert({
-        id:       user.id,
-        whatsapp: whatsapp ? `+91${normalized}` : null,
-        open_to:  openTo,
-        skills:   skillsText.split(',').map(s => s.trim()).filter(Boolean).slice(0, 10),
-      }, { onConflict: 'id' })
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsapp, open_to: openTo, skills: skillsText }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to save')
 
-      if (error) throw error
-
-      // Optimistic update
-      setDisplayWhatsapp(whatsapp ? `+91${normalized}` : null)
-      setDisplayOpenTo([...openTo])
-      setDisplaySkills(skillsText.split(',').map(s => s.trim()).filter(Boolean))
+      // Reflect the server-normalised values (single source of truth)
+      setDisplayWhatsapp(data.whatsapp ?? null)
+      setDisplayOpenTo(Array.isArray(data.open_to) ? data.open_to : [])
+      setDisplaySkills(Array.isArray(data.skills) ? data.skills : [])
       setEditing(false)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save. Try again.')

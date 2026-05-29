@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/auth'
 import fs from 'fs'
 import path from 'path'
 import Navbar from '@/components/Navbar'
@@ -16,11 +17,11 @@ function getMemberCount(): number {
 }
 
 export default async function JoinPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+  const user = await getCurrentUser()
 
   if (user) {
     // Already logged in — check if they've connected their LinkedIn profile
+    const supabase = await createClient()
     const { data: profile } = await supabase
       .from('profiles')
       .select('linkedin_url')

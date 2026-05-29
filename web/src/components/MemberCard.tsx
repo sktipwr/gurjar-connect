@@ -36,11 +36,20 @@ export default function MemberCard({ member, isLoggedIn = false }: Props) {
       <div className="flex items-start gap-3">
         {member.photo ? (
           <div className="relative shrink-0">
+            {/*
+              `unoptimized` is intentional: LinkedIn photos are already 100x100
+              (shrink_100_100) and served from signed, expiring licdn URLs.
+              Running them through Next/Vercel optimization saves ~no bytes,
+              burns the image-optimization quota across ~700 unique sources, and
+              amplifies breakage when the signed URLs expire. Real fix = self-host
+              photos in Supabase Storage (re-scrape → download → store).
+            */}
             <Image
               src={member.photo}
               alt={cleanName}
               width={56}
               height={56}
+              loading="lazy"
               className="w-14 h-14 rounded-full object-cover"
               unoptimized
             />
