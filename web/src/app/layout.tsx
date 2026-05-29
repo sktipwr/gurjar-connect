@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import BottomNav from '@/components/BottomNav'
+import InAppBrowserBanner from '@/components/InAppBrowserBanner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,6 +40,7 @@ export default async function RootLayout({
     >
       {/* pb-16 on mobile gives room for the fixed bottom nav */}
       <body className="min-h-full flex flex-col pb-16 md:pb-0">
+        <InAppBrowserBanner />
         {children}
         <BottomNav initialUser={user} />
       </body>
