@@ -18,8 +18,11 @@ DROP POLICY IF EXISTS members_insert_admin ON public.members;
 
 -- 1b. Stop exposing the SECURITY DEFINER trigger function over the REST RPC API.
 --     handle_new_user() should only ever run from the on_auth_user_created trigger.
---     Revoking EXECUTE does NOT affect trigger firing.
-REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM anon, authenticated;
+--     Revoking EXECUTE does NOT affect trigger firing (it runs as its owner).
+--     IMPORTANT: revoke from PUBLIC, not just anon/authenticated — functions grant
+--     EXECUTE to PUBLIC by default and those roles inherit it through PUBLIC, so a
+--     role-specific revoke alone is a no-op.
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 
 -- ══ 2. PERFORMANCE ════════════════════════════════════════════════════════════
