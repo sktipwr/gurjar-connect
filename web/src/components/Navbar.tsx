@@ -1,4 +1,10 @@
+'use client'
+
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Load auth button client-side only to avoid session-check on SSR
+const NavbarAuthButton = dynamic(() => import('./NavbarAuthButton'), { ssr: false })
 
 export default function Navbar() {
   return (
@@ -13,19 +19,14 @@ export default function Navbar() {
         </Link>
 
         {/* Nav links */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <Link
             href="/directory"
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             Directory
           </Link>
-          <Link
-            href="/join"
-            className="text-sm font-medium bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-600 transition-colors"
-          >
-            Join free
-          </Link>
+          <NavbarAuthButton />
         </div>
       </div>
     </nav>

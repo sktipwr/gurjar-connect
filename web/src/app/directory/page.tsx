@@ -3,20 +3,33 @@
 import { useState, useMemo, useEffect } from 'react'
 import MemberCard from '@/components/MemberCard'
 import Navbar from '@/components/Navbar'
+import { createClient } from '@/lib/supabase/client'
 import type { Member } from '@/types/member'
 
 export default function DirectoryPage() {
-  const [search, setSearch] = useState('')
+  const [search, setSearch]         = useState('')
   const [cityFilter, setCityFilter] = useState('')
   const [openToFilter, setOpenToFilter] = useState('')
-  const [members, setMembers] = useState<Member[]>([])
-  const [loading, setLoading] = useState(true)
+  const [members, setMembers]       = useState<Member[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
+    // Load members
     fetch('/api/members')
       .then(r => r.json())
       .then(data => { setMembers(data); setLoading(false) })
       .catch(() => setLoading(false))
+
+    // Check auth state
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsLoggedIn(!!session?.user)
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   const cities = useMemo(() => {
@@ -47,6 +60,7 @@ export default function DirectoryPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <Navbar />
+
       {/* Search / filter bar */}
       <div className="bg-white border-b border-gray-100 sticky top-16 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -88,10 +102,15 @@ export default function DirectoryPage() {
       {/* Stats bar */}
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-gray-500">
         <span className="font-semibold text-gray-700">{filtered.length}</span> members
+        {!isLoggedIn && (
+          <a href="/join" className="ml-auto text-xs text-orange-500 hover:underline font-medium">
+            Login to see WhatsApp numbers →
+          </a>
+        )}
         {(search || cityFilter || openToFilter) && (
           <button
             onClick={() => { setSearch(''); setCityFilter(''); setOpenToFilter('') }}
-            className="ml-auto text-orange-500 hover:underline"
+            className={`text-orange-500 hover:underline ${!isLoggedIn ? 'ml-2' : 'ml-auto'}`}
           >
             Clear filters
           </button>
@@ -124,7 +143,11 @@ export default function DirectoryPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((member, i) => (
-              <MemberCard key={member.profileUrl || i} member={member} />
+              <MemberCard
+                key={member.profileUrl || i}
+                member={member}
+                isLoggedIn={isLoggedIn}
+              />
             ))}
           </div>
         )}
