@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
       ? `+91${whatsapp.replace(/\D/g, '').slice(-10)}`
       : null
 
-    // 3. Upsert profile row (admin client to bypass RLS insert restriction)
-    const admin = createAdminClient()
-    const { error: profileError } = await admin.from('profiles').upsert(
+    // 3. Upsert profile row — use the authenticated server client so auth.uid() = user.id
+    //    satisfies the RLS insert/update policy (no service role key needed)
+    const { error: profileError } = await supabase.from('profiles').upsert(
       {
         id:           user.id,
         full_name:    user.user_metadata?.full_name   ?? null,
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 })
     }
 
-    // 4. Mark the matching scraped member as verified (best-effort)
-    //    The members table may not exist yet in Supabase — ignore error
+    // 4. Mark the matching scraped member as verified (best-effort, uses admin to bypass RLS)
+    const admin = createAdminClient()
     await admin
       .from('members')
       .update({ verified: true, claimed_by: user.id })
