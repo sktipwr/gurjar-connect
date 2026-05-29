@@ -1,12 +1,12 @@
-'use client'
-
+// Server component — reads session on every request, no client flash
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
+import { createClient } from '@/lib/supabase/server'
+import NavbarAuthButton from './NavbarAuthButton'
 
-// Load auth button client-side only to avoid session-check on SSR
-const NavbarAuthButton = dynamic(() => import('./NavbarAuthButton'), { ssr: false })
+export default async function Navbar() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
-export default function Navbar() {
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -18,15 +18,15 @@ export default function Navbar() {
           <span className="font-semibold text-gray-900">Gurjar Connect</span>
         </Link>
 
-        {/* Nav links */}
-        <div className="flex items-center gap-4">
+        {/* Desktop nav — hidden on mobile (bottom nav takes over) */}
+        <div className="hidden md:flex items-center gap-4">
           <Link
             href="/directory"
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             Directory
           </Link>
-          <NavbarAuthButton />
+          <NavbarAuthButton initialUser={user} />
         </div>
       </div>
     </nav>

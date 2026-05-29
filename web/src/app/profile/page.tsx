@@ -1,0 +1,45 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import Navbar from '@/components/Navbar'
+import ProfileClient from './ProfileClient'
+
+export default async function ProfilePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+
+  if (!user) redirect('/join')
+
+  // Load profile data
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('linkedin_url, whatsapp, skills, open_to')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  // If profile has a linkedin_url, fetch the matching member card for headline/location
+  let member: { name: string; headline: string; location: string; photo: string; verified: boolean } | null = null
+  if (profile?.linkedin_url) {
+    const { data: m } = await supabase
+      .from('members')
+      .select('name, headline, location, photo, verified')
+      .eq('profile_url', profile.linkedin_url)
+      .maybeSingle()
+    member = m ?? null
+  }
+
+  return (
+    <>
+      <Navbar />
+      <ProfileClient
+        user={{
+          id:        user.id,
+          email:     user.email ?? '',
+          fullName:  user.user_metadata?.full_name  as string ?? '',
+          avatarUrl: user.user_metadata?.avatar_url as string ?? '',
+        }}
+        profile={profile ?? null}
+        member={member}
+      />
+    </>
+  )
+}
