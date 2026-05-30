@@ -51,8 +51,10 @@ function mapMember(m) {
     profile_url: profileUrl,
     photo:       m.photo || '',
     scraped_at:  m.scrapedAt || new Date().toISOString(),
-    verified:    false,
-    claimed_by:  null,
+    // verified / claimed_by are intentionally OMITTED. Including them would
+    // overwrite (reset) members who have already claimed and verified their
+    // profile on every re-import. New rows fall back to the column defaults
+    // (verified=false, claimed_by=null).
   };
 }
 
