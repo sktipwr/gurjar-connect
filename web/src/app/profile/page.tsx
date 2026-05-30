@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/supabase/auth'
+import { getDisplayName, getAvatarUrl } from '@/lib/userDisplay'
 import Navbar from '@/components/Navbar'
 import ProfileClient from './ProfileClient'
 
@@ -36,8 +37,8 @@ export default async function ProfilePage() {
         user={{
           id:        user.id,
           email:     user.email ?? '',
-          fullName:  user.user_metadata?.full_name  as string ?? '',
-          avatarUrl: user.user_metadata?.avatar_url as string ?? '',
+          fullName:  getDisplayName(user),
+          avatarUrl: getAvatarUrl(user),
         }}
         profile={profile ?? null}
         member={member}

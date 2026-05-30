@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { getDisplayName, getFirstName, getAvatarUrl, getInitials } from '@/lib/userDisplay'
 import type { User } from '@supabase/supabase-js'
 
 const LinkedInIcon = () => (
@@ -50,9 +51,10 @@ export default function NavbarAuthButton({ initialUser }: { initialUser: User | 
   }
 
   // ── Logged in ──────────────────────────────────────────────────────────────
-  const avatarUrl = user.user_metadata?.avatar_url as string | undefined
-  const fullName  = user.user_metadata?.full_name  as string | undefined
-  const initials  = fullName?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
+  const avatarUrl = getAvatarUrl(user)
+  const fullName  = getDisplayName(user)
+  const firstName = getFirstName(user)
+  const initials  = getInitials(fullName)
 
   return (
     <div className="relative">
@@ -76,7 +78,7 @@ export default function NavbarAuthButton({ initialUser }: { initialUser: User | 
           </div>
         )}
         <span className="text-sm text-gray-700 font-medium max-w-[100px] truncate">
-          {fullName?.split(' ')[0]}
+          {firstName}
         </span>
         <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

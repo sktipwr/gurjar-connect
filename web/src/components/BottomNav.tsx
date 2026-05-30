@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getDisplayName, getAvatarUrl, getInitials } from '@/lib/userDisplay'
 import type { User } from '@supabase/supabase-js'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
@@ -69,9 +70,9 @@ export default function BottomNav({ initialUser }: { initialUser: User | null })
     return () => subscription.unsubscribe()
   }, [])
 
-  const avatarUrl  = user?.user_metadata?.avatar_url as string | undefined
-  const fullName   = user?.user_metadata?.full_name  as string | undefined
-  const initials   = fullName?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
+  const avatarUrl  = getAvatarUrl(user)
+  const fullName   = getDisplayName(user)
+  const initials   = getInitials(fullName)
 
   // Active detection
   const isHome      = pathname === '/'

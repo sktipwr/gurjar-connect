@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { isOnboarded } from '@/lib/userDisplay'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -16,18 +17,17 @@ export async function GET(request: Request) {
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!exchangeError && data.user) {
-      // Check if this user already linked their LinkedIn profile URL
+      // Returning, already-onboarded users skip the connect step entirely
       const { data: profile } = await supabase
         .from('profiles')
-        .select('linkedin_url')
+        .select('linkedin_url, whatsapp, skills, open_to')
         .eq('id', data.user.id)
         .maybeSingle()
 
-      if (profile?.linkedin_url) {
-        // Returning user — go straight to directory
+      if (isOnboarded(profile)) {
         return NextResponse.redirect(`${origin}/directory`)
       }
-      // First login — send to profile-linking step
+      // First login — send to the one-time profile step
       return NextResponse.redirect(`${origin}/auth/connect`)
     }
   }
